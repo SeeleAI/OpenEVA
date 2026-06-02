@@ -1,0 +1,13 @@
+model:
+  name: OpenEVA-Instruct-Full
+  checkpoint: checkpoints/openeva-instruct-full
+  default: false
+
+inference:
+  pointnum: 8192
+  torch_dtype: bfloat16
+  max_length: 2048
+  max_new_tokens: 128
+  temperature: 0.0
+  top_p: 1.0
+  max_history_turns: 4
