@@ -1,5 +1,7 @@
 __pycache__/
 *.py[cod]
+.venv/
+EVA01/.venv/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -7,10 +9,15 @@ __pycache__/
 
 .env
 outputs/
+EVA01/outputs/
+EVA01/hf_staging/
 logs/
 tmp/
 runtime/
 gradio_cached_examples/
+deployment/
+deployment.zip
+deployment_no_env_docker.zip
 
 checkpoints/*
 !checkpoints/.gitkeep
