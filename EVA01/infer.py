@@ -15,7 +15,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from EVA01 import EVA01ForConditionalGeneration, EVA01Processor
+from eva01 import EVA01ForConditionalGeneration, EVA01Processor
 
 
 DEFAULT_MODEL = "SEELE-AI/EVA01-2B-Instruct"

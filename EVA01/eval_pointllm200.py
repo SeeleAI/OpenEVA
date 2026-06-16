@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 from pathlib import Path
 import sys
@@ -18,8 +19,8 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from EVA01 import EVA01ForConditionalGeneration, EVA01Processor
-from EVA01.metrics import (
+from eva01 import EVA01ForConditionalGeneration, EVA01Processor
+from eva01.metrics import (
     compute_caption_overlap_metrics,
     compute_gpt_average_score,
     compute_meteor_score,
@@ -27,7 +28,7 @@ from EVA01.metrics import (
     compute_simcse_similarity,
     save_caption_metric_bundle,
 )
-from EVA01.render_judge import score_manifest
+from eva01.render_judge import score_manifest
 
 
 FULL_REPO = "SEELE-AI/EVA01-2B-Instruct"
@@ -42,13 +43,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--checkpoint", default=None)
     parser.add_argument("--base-model", default=None, help="Optional local Qwen3VL base path for LoRA checkpoints.")
     parser.add_argument("--benchmark-dir", default=None)
+    parser.add_argument("--render-dir", default=None, help="Directory with Blender PBR GLB renders for GPT-img. Defaults to <benchmark-dir>/renders_blender_pbr.")
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "pointllm200"))
+    parser.add_argument("--predictions-json", default=None, help="Score an existing predictions JSON without loading EVA01.")
     parser.add_argument("--max-new-tokens", type=int, default=96)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--torch-dtype", default="bfloat16")
     parser.add_argument("--device-map", default="auto")
-    parser.add_argument("--with-gpt", action="store_true")
-    parser.add_argument("--gpt-model", default=None)
+    parser.add_argument("--with-gpt", action="store_true", help="Also run GPT-ref and GPT-img judges when OPENAI_API_KEY is set.")
+    parser.add_argument("--gpt-model", default=None, help="GPT judge model. Defaults to OPENAI_JUDGE_MODEL or gpt-4o.")
     parser.add_argument("--gpt-workers", type=int, default=1)
     parser.add_argument("--seed", type=int, default=SEED)
     return parser.parse_args()
@@ -75,6 +78,12 @@ def resolve_benchmark(path: str | None) -> Path:
     return Path(snapshot) / "benchmark" / "pointllm200"
 
 
+def resolve_render_dir(path: str | None, benchmark: Path) -> Path:
+    if path:
+        return Path(path).expanduser()
+    return benchmark / "renders_blender_pbr"
+
+
 def load_annotations(path: Path) -> list[dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     rows: list[dict[str, Any]] = []
@@ -89,10 +98,19 @@ def load_annotations(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def load_predictions(path: str | Path) -> tuple[str, list[dict[str, str]]]:
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    prompt = str(payload.get("prompt") or PROMPT)
+    results = payload.get("results")
+    if not isinstance(results, list):
+        raise ValueError("Predictions JSON must contain a 'results' list.")
+    return prompt, [dict(row) for row in results]
+
+
 def build_render_manifest(rows: list[dict[str, Any]], render_dir: Path, prediction_by_id: dict[str, str]) -> list[dict[str, Any]]:
     items = []
     for row in rows:
-        object_id = row["object_id"]
+        object_id = str(row["object_id"])
         base = render_dir / object_id
         renders = {view: str(base / f"{view}.png") for view in ("front", "right", "back", "left")}
         if all(Path(path).exists() for path in renders.values()):
@@ -100,14 +118,90 @@ def build_render_manifest(rows: list[dict[str, Any]], render_dir: Path, predicti
     return items
 
 
+def score_predictions(
+    predictions: list[dict[str, str]],
+    *,
+    output_dir: Path,
+    metadata: dict[str, Any],
+    with_gpt: bool = False,
+    gpt_model: str | None = None,
+    gpt_workers: int = 1,
+) -> tuple[Path, dict[str, float]]:
+    bundle = compute_caption_overlap_metrics(predictions)
+    bundle = compute_meteor_score(bundle)
+    bundle = compute_sentence_bert_similarity(bundle)
+    bundle = compute_simcse_similarity(bundle, batch_size=16, device="cuda" if torch.cuda.is_available() else "cpu")
+    bundle.metadata = metadata
+    if with_gpt:
+        bundle = compute_gpt_average_score(bundle, model_name=gpt_model or "", workers=gpt_workers)
+    metrics_json = output_dir / "objaverse_captioning_prompt2_metrics.json"
+    save_caption_metric_bundle(bundle, metrics_json)
+    return metrics_json, bundle.overall_scores
+
+
+def maybe_score_gpt_img(
+    predictions: list[dict[str, str]],
+    *,
+    render_dir: Path,
+    output_dir: Path,
+    gpt_model: str | None,
+    gpt_workers: int,
+) -> Path | None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    prediction_by_id = {row["object_id"]: row["model_output"] for row in predictions}
+    manifest = build_render_manifest(predictions, render_dir, prediction_by_id)
+    manifest_path = output_dir / "gpt_img_manifest.json"
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if not manifest:
+        print(f"Skip GPT-img: no complete render sets found under {render_dir}.", file=sys.stderr)
+        return None
+    if not os.environ.get("OPENAI_API_KEY"):
+        print("Skip GPT-img: OPENAI_API_KEY is missing; wrote manifest only.", file=sys.stderr)
+        return None
+    model_name = gpt_model or os.environ.get("OPENAI_JUDGE_MODEL") or "gpt-4o"
+    judge_payload = score_manifest(manifest_path, model_name=model_name, workers=gpt_workers)
+    scores_path = output_dir / "gpt_img_scores.json"
+    scores_path.write_text(json.dumps(judge_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return scores_path
+
+
 def main() -> None:
     args = parse_args()
     set_seed(args.seed)
     checkpoint = args.checkpoint or (LORA_REPO if args.variant == "lora" else FULL_REPO)
-    benchmark = resolve_benchmark(args.benchmark_dir)
     output_dir = Path(args.output_dir) / args.variant
     output_dir.mkdir(parents=True, exist_ok=True)
+    if args.predictions_json:
+        prompt, predictions = load_predictions(args.predictions_json)
+        benchmark = resolve_benchmark(args.benchmark_dir) if args.with_gpt else None
+        metrics_json, scores = score_predictions(
+            predictions,
+            output_dir=output_dir,
+            metadata={
+                "variant": args.variant,
+                "checkpoint": checkpoint,
+                "predictions_json": str(Path(args.predictions_json).expanduser()),
+                "seed": args.seed,
+                "prompt": prompt,
+                "num_samples": len(predictions),
+            },
+            with_gpt=args.with_gpt,
+            gpt_model=args.gpt_model,
+            gpt_workers=args.gpt_workers,
+        )
+        gpt_img_json = None
+        if args.with_gpt and benchmark is not None:
+            gpt_img_json = maybe_score_gpt_img(
+                predictions,
+                render_dir=resolve_render_dir(args.render_dir, benchmark),
+                output_dir=output_dir,
+                gpt_model=args.gpt_model,
+                gpt_workers=args.gpt_workers,
+            )
+        print(json.dumps({"metrics": str(metrics_json), "gpt_img_scores": str(gpt_img_json) if gpt_img_json else None, "scores": scores}, indent=2))
+        return
 
+    benchmark = resolve_benchmark(args.benchmark_dir)
     annotation_path = benchmark / "PointLLM_brief_description_val_200_GT.json"
     pointcloud_dir = benchmark / "8192_npy"
     rows = load_annotations(annotation_path)
@@ -145,33 +239,31 @@ def main() -> None:
     predictions_json = output_dir / "objaverse_captioning_prompt2_predictions.json"
     predictions_json.write_text(json.dumps({"prompt": PROMPT, "results": predictions}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    bundle = compute_caption_overlap_metrics(predictions)
-    bundle = compute_meteor_score(bundle)
-    bundle = compute_sentence_bert_similarity(bundle)
-    bundle = compute_simcse_similarity(bundle, batch_size=16, device="cuda" if torch.cuda.is_available() else "cpu")
-    bundle.metadata = {
-        "variant": args.variant,
-        "checkpoint": checkpoint,
-        "benchmark_dir": str(benchmark),
-        "seed": args.seed,
-        "prompt": PROMPT,
-        "num_samples": len(predictions),
-    }
+    metrics_json, scores = score_predictions(
+        predictions,
+        output_dir=output_dir,
+        metadata={
+            "variant": args.variant,
+            "checkpoint": checkpoint,
+            "benchmark_dir": str(benchmark),
+            "seed": args.seed,
+            "prompt": PROMPT,
+            "num_samples": len(predictions),
+        },
+        with_gpt=args.with_gpt,
+        gpt_model=args.gpt_model,
+        gpt_workers=args.gpt_workers,
+    )
+    gpt_img_json = None
     if args.with_gpt:
-        if args.gpt_model:
-            bundle = compute_gpt_average_score(bundle, model_name=args.gpt_model, workers=args.gpt_workers)
-        render_dir = benchmark / "renders"
-        prediction_by_id = {row["object_id"]: row["model_output"] for row in predictions}
-        manifest = build_render_manifest(predictions, render_dir, prediction_by_id)
-        manifest_path = output_dir / "gpt_img_manifest.json"
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        if args.gpt_model and manifest:
-            judge_payload = score_manifest(manifest_path, model_name=args.gpt_model, workers=args.gpt_workers)
-            (output_dir / "gpt_img_scores.json").write_text(json.dumps(judge_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-    metrics_json = output_dir / "objaverse_captioning_prompt2_metrics.json"
-    save_caption_metric_bundle(bundle, metrics_json)
-    print(json.dumps({"predictions": str(predictions_json), "metrics": str(metrics_json), "scores": bundle.overall_scores}, indent=2))
+        gpt_img_json = maybe_score_gpt_img(
+            predictions,
+            render_dir=resolve_render_dir(args.render_dir, benchmark),
+            output_dir=output_dir,
+            gpt_model=args.gpt_model,
+            gpt_workers=args.gpt_workers,
+        )
+    print(json.dumps({"predictions": str(predictions_json), "metrics": str(metrics_json), "gpt_img_scores": str(gpt_img_json) if gpt_img_json else None, "scores": scores}, indent=2))
 
 
 if __name__ == "__main__":

@@ -119,6 +119,8 @@ class EVA01ForConditionalGeneration(PreTrainedModel):
             dtype=torch_dtype,
         )
         self._output_dtype = torch.float32 if torch_dtype is None else torch_dtype
+        self.mesh_und_encoder.to(device=self.device)
+        self.mesh_und_connector.to(device=self.device)
         self.eval()
         for parameter in self.parameters():
             parameter.requires_grad_(False)

@@ -13,12 +13,6 @@ from typing import Any, Dict, Iterable, List, Sequence
 
 LOGGER = logging.getLogger("eva01.metrics")
 
-BENCHMARK_PROMPTS = [
-    "What is this?",
-    "This is an object of ",
-    "Caption this 3D model in detail.",
-]
-
 GPT_CAPTION_PROMPT = """Evaluate a model-generated caption against a human-generated caption (ground truth) for a 3D model. Identify the aspects mentioned in the human caption and calculate the percentage of these aspects correctly mentioned or partially matched in the model caption. Score from 0 to 100, where each aspect contributes equally to the score. Consider similar concepts for partial score.
 
 Provide your score (0-100) and a short justification (less than 15 words) in the format of 'score#reason'
@@ -299,23 +293,6 @@ def save_caption_metric_bundle(bundle: CaptionMetricBundle, output_path: str | P
         json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
-def load_benchmark_annotations(path: str | Path) -> List[Dict[str, Any]]:
-    annotation_path = Path(path)
-    with annotation_path.open("r", encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, list):
-        raise ValueError(f"Expected eval annotation payload to be a list, got {type(payload)!r}")
-    return [dict(item) for item in payload]
-
-
-def dump_benchmark_results_json(*, prompt_text: str, rows: Sequence[Dict[str, Any]], output_path: str | Path) -> None:
-    payload = {"prompt": prompt_text, "results": list(rows)}
-    target = Path(output_path)
-    target.parent.mkdir(parents=True, exist_ok=True)
-    with target.open("w", encoding="utf-8") as handle:
-        json.dump(payload, handle, ensure_ascii=False, indent=2)
-
-
 def _resolve_openai_base_url() -> str:
     return os.environ.get("OPENAI_BASE_URL") or os.environ.get("OPENAI_API_BASE") or "https://api.openai.com/v1"
 
@@ -491,18 +468,14 @@ def compute_gpt_average_score(
     bundle.metadata = metadata
     return bundle
 
-
 __all__ = [
     "CaptionMetricBundle",
-    "BENCHMARK_PROMPTS",
     "GPT_CAPTION_PROMPT",
     "compute_caption_overlap_metrics",
     "compute_gpt_average_score",
     "compute_meteor_score",
     "compute_sentence_bert_similarity",
     "compute_simcse_similarity",
-    "dump_benchmark_results_json",
-    "load_benchmark_annotations",
     "parse_gpt_caption_score_response",
     "request_openai_text_response",
     "save_caption_metric_bundle",

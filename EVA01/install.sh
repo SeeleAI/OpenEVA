@@ -16,7 +16,12 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-uv venv "${VENV_DIR}" --python "${PYTHON_BIN}"
+export UV_HTTP_TIMEOUT="${UV_HTTP_TIMEOUT:-180}"
+if [ -x "${VENV_DIR}/bin/python" ] && [ "${UV_VENV_CLEAR:-0}" != "1" ]; then
+  echo "Using existing virtual environment at ${VENV_DIR}"
+else
+  uv venv "${VENV_DIR}" --python "${PYTHON_BIN}"
+fi
 
 TORCH_INDEX_URL="${TORCH_INDEX_URL:-}"
 if [ -z "${TORCH_INDEX_URL}" ] && command -v nvidia-smi >/dev/null 2>&1; then
