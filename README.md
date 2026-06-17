@@ -11,8 +11,9 @@
 </p>
 
 <div align="center">
-  <h2>OpenEVA / SEELE-AI</h2>
-  <p><strong>Logo placeholder</strong></p>
+  <img src="EVA01/assets/branding/OpenEVA-logo.png" alt="OpenEVA" width="520">
+  <br>
+  <img src="EVA01/assets/branding/seele-logo.png" alt="SEELE" width="260">
 </div>
 
 OpenEVA is the community release hub for SEELE-AI's EVA series: native 3D foundation models for mesh understanding, generation, and long-context editing.
