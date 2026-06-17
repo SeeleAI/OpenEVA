@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eva01"
+version = "0.1.0"
+description = "EVA01 2B Instruct mesh understanding inference and evaluation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+  "accelerate",
+  "gradio",
+  "huggingface_hub",
+  "nltk",
+  "numpy",
+  "openai",
+  "peft",
+  "pillow",
+  "requests",
+  "safetensors",
+  "sentence-transformers",
+  "torch>=2.6",
+  "tqdm",
+  "transformers>=4.57.0",
+  "trimesh",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
