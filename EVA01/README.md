@@ -13,13 +13,13 @@
   <img src="assets/teaser.png" alt="EVA01 teaser" width="92%">
 </p>
 
-EVA01 is a unified native 3D framework for mesh understanding, shape generation, and context-aware editing. The current OpenEVA release exposes the **UND-side** checkpoints and runtime: `.glb` mesh input is sampled deterministically, encoded by the EVA01 UND stack, projected into mesh tokens, and answered by a Qwen3-VL language backbone.
+EVA01 is a unified native 3D framework for mesh understanding and 3D generation. This OpenEVA release covers mesh understanding/QA, text-to-3D, and image-to-3D. The generation runtime is the final Unified MoT architecture and executes the native `SS → Shape-512 → Material-512` cascade.
 
 ## 🌌 Overview
 
 EVA01 integrates 3D meshes as a native modality for multimodal large language models. Its technical report describes a Mixture-of-Transformers architecture with a pre-trained Understanding Expert and a structurally mirrored Generation Expert, coupled through shared global self-attention and hard modality routing.
 
-The public package in this repository is intentionally focused. It releases the UND-side model path, a compact inference interface, a Gradio chat app, PointLLM-200 evaluation, and 10 local TexVerse examples with real Blender PBR four-view renders.
+The package provides the existing mesh-understanding interface and a generation-only Unified MoT runtime. Unified generation uses Qwen3-VL conditioning, a 30-slot canonical condition carrier, direct CUDA FlexAttention, dense TRELLIS1 SS latents, and sparse TRELLIS2 Shape/Material latents.
 
 ## ✨ Release Status
 
@@ -27,9 +27,15 @@ The public package in this repository is intentionally focused. It releases the 
 | --- | --- |
 | UND-side Full checkpoint | 🟢 [`SEELE-AI/EVA01-2B-Instruct`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct) |
 | UND-side LoRA checkpoint | 🟢 [`SEELE-AI/EVA01-2B-Instruct-LoRA`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA) |
-| Training recipe | 🧪 Full and LoRA checkpoints are trained with alignment followed by instruction tuning. |
-| Data release | 🟣 Planned. |
-| Generation-side open source | 🟡 Planned for EVA02 rather than exposed in the current UND-side release. |
+| Training code | 🟡 Planned for future release. |
+| Data release | 🟣 Planned for future release. |
+| Unified generation adapter | 🟢 `SEELE-AI/EVA01-Unified-All-Task-Generation` (Hugging Face link pending) |
+| Unified generation LoRA bundle | 🟢 `SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA` (Hugging Face link pending) |
+| Editing | 🟡 Planned for future release. |
+
+### Hugging Face links pending
+
+The model repository links will be added after the release repositories and upload permissions are finalized.
 
 ## ⚡ Install
 
@@ -47,6 +53,14 @@ If a different CUDA wheel index is required, set `TORCH_INDEX_URL` before runnin
 TORCH_INDEX_URL=https://download.pytorch.org/whl/cu121 bash install.sh
 ```
 
+Unified generation additionally requires a CUDA GPU, PyTorch 2.6 or newer,
+Transformers 4.57 or newer, a TRELLIS-compatible `flex_gemm` installation,
+and `flash-attn` for the bundled native TRELLIS sparse-attention backend.
+Unified MoT attention itself uses PyTorch CUDA FlexAttention with direct
+`BlockMask` objects; `flash-attn` is only used inside the native TRELLIS
+branches. Install the CUDA extensions against the same PyTorch and CUDA build
+as the active EVA01 environment.
+
 ## 🚀 Quick Inference
 
 ```bash
@@ -55,7 +69,53 @@ python infer.py \
   --question "Describe this 3D object in detail."
 ```
 
-Python API:
+Text-to-3D:
+
+```bash
+python generate.py \
+  --prompt "a small ceramic fox" \
+  --checkpoint /path/to/eva01-generation-adapter \
+  --tokenizer-root /path/to/eva01-unified-tokenizer \
+  --qwen-root /path/to/Qwen3-VL-2B-Instruct \
+  --ss-xl-stem /path/to/ss_flow_txt_dit_XL_16l8_fp16 \
+  --shape-stem /path/to/slat_flow_img2shape_dit_1_3B_512_bf16 \
+  --material-stem /path/to/slat_flow_imgshape2tex_dit_1_3B_512_bf16 \
+  --normalization-config /path/to/TRELLIS.2-4B/pipeline.json \
+  --ss-decoder-stem /path/to/ss_dec_conv3d_16l8_fp16 \
+  --output outputs/ceramic_fox.npz
+```
+
+To export the same generation result as a GLB with decoded geometry and a
+vertex-color material preview, provide the external
+TRELLIS.2 Shape and Material decoder stems and an additional output path:
+
+```bash
+python generate.py \
+  --prompt "a small ceramic fox" \
+  --checkpoint /path/to/eva01-generation-adapter \
+  --tokenizer-root /path/to/eva01-unified-tokenizer \
+  --qwen-root /path/to/Qwen3-VL-2B-Instruct \
+  --ss-xl-stem /path/to/ss_flow_txt_dit_XL_16l8_fp16 \
+  --shape-stem /path/to/slat_flow_img2shape_dit_1_3B_512_bf16 \
+  --material-stem /path/to/slat_flow_imgshape2tex_dit_1_3B_512_bf16 \
+  --normalization-config /path/to/TRELLIS.2-4B/pipeline.json \
+  --ss-decoder-stem /path/to/TRELLIS-image-large/ckpts/ss_dec_conv3d_16l8_fp16 \
+  --shape-decoder-stem /path/to/TRELLIS.2-4B/ckpts/shape_dec_next_dc_f16c32_fp16 \
+  --material-decoder-stem /path/to/TRELLIS.2-4B/ckpts/tex_dec_next_dc_f16c32_fp16 \
+  --output outputs/ceramic_fox.npz \
+  --output-glb outputs/ceramic_fox.glb
+```
+
+The SS decoder is the `sparse_structure_decoder` selected by the TRELLIS.2
+pipeline and is physically supplied by TRELLIS-image-large. Shape and Material
+use the TRELLIS.2 Shape and Material decoders. These decoder checkpoints are
+external assets; they are never downloaded into or redistributed by EVA01. The
+GLB writer preserves the decoded mesh directly and does not run optional
+topology repair or remeshing.
+
+For image-to-3D, replace `--prompt` with `--image path/to/image.png`. The output archive contains the dense SS latent, sparse Shape coordinates/features, and sparse Material coordinates/features. Shape and Material keep identical coordinates. The runtime fails closed if CUDA FlexAttention, a base checkpoint, or the tokenizer ABI is unavailable.
+
+Mesh-understanding Python API:
 
 ```python
 import torch
@@ -148,7 +208,7 @@ GPT-ref uses the original reference-judge run. GPT-img uses staged Blender PBR G
 
 ## 🖼️ Gallery
 
-The gallery uses 10 TexVerse GLB meshes included in `assets/examples/`. Each preview is a real Blender PBR 2x2 four-view render from the original `.glb`, ordered as front, right, back, and left. Full prompts, model answers, and GT captions are stored in `assets/examples/gallery.json`.
+The gallery contains mesh-understanding and generation examples. The mesh-understanding gallery uses 10 TexVerse GLB meshes included in `assets/examples/`. Each understanding preview is a real Blender PBR 2x2 four-view render from the original `.glb`, ordered as front, right, back, and left. Full prompts, model answers, and GT captions are stored in `assets/examples/gallery.json`.
 
 | Preview | Example | Q1 | A1 | Q2 | A2 | GT Caption |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -163,16 +223,37 @@ The gallery uses 10 TexVerse GLB meshes included in `assets/examples/`. Each pre
 | <img src="assets/gallery/alien_plants_4view.png" alt="alien_plants PBR four-view render" width="180"> | `alien_plants` | Describe this 3D object in detail. | The object is a series of interconnected, colorful structures resembling a plant or a series of stacked cups. Each structure has a distinct color and... | What makes these plants look alien or fantastical? | The plants have exaggerated features such as large, bulbous heads, long stems, and vibrant colors, giving them an alien or fantas... | A collection of five fantastical alien plants. From left to right, the first plant has a dark brown root-like base with a glowing, curved, tentacle-shaped stem in bright... |
 | <img src="assets/gallery/decorative_bottles_4view.png" alt="decorative_bottles PBR four-view render" width="180"> | `decorative_bottles` | Describe this 3D object in detail. | The object is a wooden shelf with a rectangular base and a flat top. It holds several bottles of various colors and shapes, including a tall bottle w... | How do the bottles differ in shape, color, and ornamentation? | The bottles differ in shape, color, and ornamentation, with some being tall and narrow, others round and bulbous, and some featur... | A collection of ornate decorative bottles displayed on a wooden shelf. The shelf holds six uniquely shaped bottles: on the top row, a purple bottle with twin handles and... |
 
+### Text-to-3D
+
+The following examples are generated by the public text-to-3D runtime. Each preview is rendered with Blender Eevee using four views in the order front, right, back, and left. The preview shows decoded geometry with the current vertex-color material output; it is not a UV/PBR texture-baked render.
+
+| Prompt | Blender render |
+| --- | --- |
+| `Humanoid mecha robot with teal and beige armor, small head integrated into torso, antennas, segmented arms with multi-barreled gun and single-barrel weapon, strong armored legs.` | <img src="assets/gallery/generation/text_mecha_robot_blender_4view.png" alt="Text-to-3D mecha robot rendered with Blender" width="360"> |
+| `A historical castle with gray stone walls and towers, including cylindrical corner towers with conical roofs, a gatehouse tower with drawbridge, inner buildings with brown and green roofs.` | <img src="assets/gallery/generation/text_historical_castle_blender_4view.png" alt="Text-to-3D historical castle rendered with Blender" width="360"> |
+
+### Image-to-3D
+
+The following examples use one input image per sample. The right column shows the corresponding decoded mesh rendered with Blender Eevee.
+
+| Input image | Blender render |
+| --- | --- |
+| <img src="assets/gallery/generation/image_mecha_robot_input.png" alt="Input image for image-to-3D mecha robot" width="180"> | <img src="assets/gallery/generation/image_mecha_robot_blender_4view.png" alt="Image-to-3D mecha robot rendered with Blender" width="360"> |
+| <img src="assets/gallery/generation/image_pickup_truck_input.png" alt="Input image for image-to-3D pickup truck" width="180"> | <img src="assets/gallery/generation/image_pickup_truck_blender_4view.png" alt="Image-to-3D pickup truck rendered with Blender" width="360"> |
+| <img src="assets/gallery/generation/image_electric_guitar_input.png" alt="Input image for image-to-3D electric guitar" width="180"> | <img src="assets/gallery/generation/image_electric_guitar_blender_4view.png" alt="Image-to-3D electric guitar rendered with Blender" width="360"> |
+
+The generation example metadata is available at [`assets/gallery/generation/generation_examples.json`](assets/gallery/generation/generation_examples.json). The example assets intentionally include only input images and rendered previews; generated GLB files are not bundled in the repository.
+
 ## 📦 Checkpoint Format
 
-Full checkpoints contain the Qwen3-VL weights under `qwen3vl/`, the EVA01 mesh UND encoder and connector in safetensors files, the tokenizer, `processor_config.json`, and `config.json`.
+Mesh-understanding Full checkpoints contain the Qwen3-VL weights, the EVA01 mesh UND encoder and connector, tokenizer assets, `processor_config.json`, and `config.json`. Mesh-understanding LoRA checkpoints use PEFT adapter files plus the mesh UND components.
 
-LoRA checkpoints contain standard PEFT adapter files plus the EVA01 mesh UND encoder and connector. The LoRA config points to `Qwen/Qwen3-VL-2B-Instruct` as the base model.
+Unified generation is distributed in two generation-only forms. The adapter package stores the complete Unified MoT adapter-owned state in `adapter_model.safetensors`. The LoRA bundle stores the same required generation state in `lora_model.safetensors` for workflows that keep all frozen bases external. Both packages use `adapter_config.json`, exclude unreleased weights, and require matching Qwen3-VL, TRELLIS1 SS, TRELLIS2 Shape-512, TRELLIS2 Material-512, tokenizer, normalization, and SS decoder assets.
 
 ## 🗺️ Roadmap
 
 - 🟣 Public data release is planned.
-- 🟡 Generation-side open-source release is planned for EVA02 rather than exposed in the current UND-side release.
+- 🟡 Editing code and weights are planned for a future release.
 - 🧪 Benchmark packaging and reproducibility evidence will continue to follow the public EVA01 evaluation flow.
 
 ## 📚 Citation

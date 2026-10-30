@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "runtime": "inference_only",
+  "generation": {
+    "checkpoint_repositories": {
+      "adapter": "SEELE-AI/EVA01-Unified-All-Task-Generation",
+      "lora": "SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA"
+    },
+    "cascade": ["ss", "shape", "material"],
+    "condition_modes": ["text", "image"],
+    "image_condition_protocol": "one image view per generation request"
+  },
+  "external_assets": [
+    {
+      "name": "qwen3_vl_base",
+      "source": "Qwen3-VL-2B-Instruct",
+      "purpose": "text and image conditioning"
+    },
+    {
+      "name": "ss_flow_base",
+      "source": "TRELLIS text-to-SS XL",
+      "purpose": "SS generation branch"
+    },
+    {
+      "name": "shape_flow_base",
+      "source": "TRELLIS.2 Shape-512",
+      "purpose": "Shape generation branch"
+    },
+    {
+      "name": "material_flow_base",
+      "source": "TRELLIS.2 Material-512",
+      "purpose": "Material generation branch"
+    },
+    {
+      "name": "ss_decoder",
+      "source": "TRELLIS.2 pipeline sparse_structure_decoder entry, resolved to the TRELLIS-image-large SS decoder",
+      "purpose": "SS latent decoding",
+      "resolution": 16
+    },
+    {
+      "name": "shape_decoder",
+      "source": "TRELLIS.2 Shape decoder",
+      "purpose": "Shape latent to mesh"
+    },
+    {
+      "name": "material_decoder",
+      "source": "TRELLIS.2 Material decoder",
+      "purpose": "Material latent and PBR attributes"
+    },
+    {
+      "name": "tokenizer_and_processor",
+      "source": "matching EVA01/Qwen tokenizer and processor assets",
+      "purpose": "condition ABI"
+    },
+    {
+      "name": "normalization",
+      "source": "matching TRELLIS.2 pipeline normalization configuration",
+      "purpose": "Shape and Material latent normalization"
+    }
+  ],
+  "required_runtime": [
+    "CUDA",
+    "PyTorch >= 2.6",
+    "CUDA FlexAttention",
+    "flex_gemm",
+    "flash-attn",
+    "o_voxel"
+  ],
+  "distribution": {
+    "decoder_weights_in_repository": false,
+    "decoder_weights_in_eva01_huggingface_repositories": false,
+    "checkpoint_sha256_in_public_configuration": false,
+    "training_code_in_public_release": false,
+    "editing_in_public_release": false
+  }
+}

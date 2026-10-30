@@ -1,0 +1,32 @@
+[
+  {
+    "name": "text_mecha_robot",
+    "mode": "text-to-3D",
+    "prompt": "Humanoid mecha robot with teal and beige armor, small head integrated into torso, antennas, segmented arms with multi-barreled gun and single-barrel weapon, strong armored legs.",
+    "render": "text_mecha_robot_blender_4view.png"
+  },
+  {
+    "name": "text_historical_castle",
+    "mode": "text-to-3D",
+    "prompt": "A historical castle with gray stone walls and towers, including cylindrical corner towers with conical roofs, a gatehouse tower with drawbridge, inner buildings with brown and green roofs.",
+    "render": "text_historical_castle_blender_4view.png"
+  },
+  {
+    "name": "image_mecha_robot",
+    "mode": "image-to-3D",
+    "input": "image_mecha_robot_input.png",
+    "render": "image_mecha_robot_blender_4view.png"
+  },
+  {
+    "name": "image_pickup_truck",
+    "mode": "image-to-3D",
+    "input": "image_pickup_truck_input.png",
+    "render": "image_pickup_truck_blender_4view.png"
+  },
+  {
+    "name": "image_electric_guitar",
+    "mode": "image-to-3D",
+    "input": "image_electric_guitar_input.png",
+    "render": "image_electric_guitar_blender_4view.png"
+  }
+]

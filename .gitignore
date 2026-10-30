@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+build/
 .venv/
 EVA01/.venv/
 .pytest_cache/
@@ -12,13 +13,25 @@ EVA01/.venv/
 outputs/
 EVA01/outputs/
 EVA01/hf_staging/
+EVA01/understanding/data/
 logs/
 tmp/
 runtime/
+!EVA01/src/diffusionstudio/pipelines/eva01/qwen3_mot/runtime/
+!EVA01/src/diffusionstudio/pipelines/eva01/qwen3_mot/runtime/**
+EVA01/src/diffusionstudio/pipelines/eva01/qwen3_mot/runtime/**/__pycache__/
+EVA01/src/diffusionstudio/pipelines/eva01/qwen3_mot/runtime/**/*.py[cod]
 gradio_cached_examples/
 deployment/
 deployment.zip
 deployment_no_env_docker.zip
+
+# Agent-private scratch is intentionally outside shared project truth.
+AGENTS.md
+CLAUDE.md
+.agent-os/
+.agent-os/private/*
+!.agent-os/private/README.md
 
 checkpoints/*
 !checkpoints/.gitkeep
