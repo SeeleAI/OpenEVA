@@ -40,8 +40,8 @@ The current public package contains the final **EVA01 Unified All-Task** boundar
 
 | Model | Status | Checkpoint | Notes |
 | --- | --- | --- | --- |
-| EVA01 Unified All-Task | 🟢 Generation adapter | `SEELE-AI/EVA01-Unified-All-Task-Generation` (Hugging Face link pending) | Generation-only Unified MoT adapter for text-to-3D and image-to-3D. Requires the matching frozen base assets. |
-| EVA01 Unified All-Task LoRA | 🟢 Generation LoRA | `SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA` (Hugging Face link pending) | Generation-only LoRA export with the same Unified MoT ABI. |
+| EVA01 Unified All-Task | 🟢 Generation adapter | [`SEELE-AI/EVA01-Unified-All-Task-Generation`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation) | Generation-only Unified MoT adapter for text-to-3D and image-to-3D. Requires the matching frozen base assets. |
+| EVA01 Unified All-Task LoRA | 🟢 Generation LoRA | [`SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA) | Generation-only LoRA export with the same Unified MoT ABI. |
 | EVA01-2B-Instruct | 🟢 Mesh understanding | [`SEELE-AI/EVA01-2B-Instruct`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct) | Mesh UND checkpoint for QA and description. |
 | EVA01-2B-Instruct-LoRA | 🟢 Mesh understanding LoRA | [`SEELE-AI/EVA01-2B-Instruct-LoRA`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA) | PEFT adapter release for mesh understanding. |
 | EVA01 data | 🟣 Planned | TBA | Public data release is planned. |

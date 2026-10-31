@@ -29,13 +29,9 @@ The package provides the existing mesh-understanding interface and a generation-
 | UND-side LoRA checkpoint | 🟢 [`SEELE-AI/EVA01-2B-Instruct-LoRA`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA) |
 | Training code | 🟡 Planned for future release. |
 | Data release | 🟣 Planned for future release. |
-| Unified generation adapter | 🟢 `SEELE-AI/EVA01-Unified-All-Task-Generation` (Hugging Face link pending) |
-| Unified generation LoRA bundle | 🟢 `SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA` (Hugging Face link pending) |
+| Unified generation adapter | 🟢 [`SEELE-AI/EVA01-Unified-All-Task-Generation`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation) |
+| Unified generation LoRA bundle | 🟢 [`SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA) |
 | Editing | 🟡 Planned for future release. |
-
-### Hugging Face links pending
-
-The model repository links will be added after the release repositories and upload permissions are finalized.
 
 ## ⚡ Install
 
