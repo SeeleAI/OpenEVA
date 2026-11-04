@@ -5,6 +5,7 @@
   <a href="https://github.com/SeeleAI/OpenEVA"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-OpenEVA-7B2CBF?style=for-the-badge&logo=github&logoColor=white"></a>
   <a href="https://huggingface.co/SEELE-AI/EVA01-2B-Instruct"><img alt="Hugging Face Full" src="https://img.shields.io/badge/%F0%9F%A4%97%20Full-EVA01--2B--Instruct-39D353?style=for-the-badge"></a>
   <a href="https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA"><img alt="Hugging Face LoRA" src="https://img.shields.io/badge/%F0%9F%A4%97%20LoRA-EVA01--2B--Instruct--LoRA-7B2CBF?style=for-the-badge"></a>
+  <a href="https://huggingface.co/datasets/SEELE-AI/EVA01-Edit"><img alt="EVA01-Edit dataset" src="https://img.shields.io/badge/EVA01--Edit%20Dataset-39D353?style=for-the-badge"></a>
   <a href="https://www.seeles.ai/research/pages/EVA01"><img alt="Project Page" src="https://img.shields.io/badge/Project%20Page-EVA01-39D353?style=for-the-badge"></a>
   <a href="https://arxiv.org/abs/2605.16745"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2605.16745-7B2CBF?style=for-the-badge&logo=arxiv&logoColor=white"></a>
 </p>
@@ -28,7 +29,7 @@ The package provides the existing mesh-understanding interface and a generation-
 | UND-side Full checkpoint | 🟢 [`SEELE-AI/EVA01-2B-Instruct`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct) |
 | UND-side LoRA checkpoint | 🟢 [`SEELE-AI/EVA01-2B-Instruct-LoRA`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA) |
 | Training code | 🟡 Planned for future release. |
-| Data release | 🟣 Planned for future release. |
+| Data release | 🟢 [`SEELE-AI/EVA01-Edit`](https://huggingface.co/datasets/SEELE-AI/EVA01-Edit) |
 | Unified generation adapter | 🟢 [`SEELE-AI/EVA01-Unified-All-Task-Generation`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation) |
 | Unified generation LoRA bundle | 🟢 [`SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA) |
 | Editing | 🟡 Planned for future release. |
@@ -248,9 +249,8 @@ Unified generation is distributed in two generation-only forms. The adapter pack
 
 ## 🗺️ Roadmap
 
-- 🟣 Public data release is planned.
+- 🟢 The [EVA01-Edit dataset](https://huggingface.co/datasets/SEELE-AI/EVA01-Edit) is publicly released.
 - 🟡 Editing code and weights are planned for a future release.
-- 🧪 Benchmark packaging and reproducibility evidence will continue to follow the public EVA01 evaluation flow.
 
 ## 📚 Citation
 

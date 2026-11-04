@@ -4,6 +4,7 @@
   <a href="https://github.com/SeeleAI/OpenEVA"><img alt="Visitors" src="https://visitor-badge.laobi.icu/badge?page_id=SeeleAI.OpenEVA&left_color=7B2CBF&right_color=39D353"></a>
   <a href="https://github.com/SeeleAI"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-SeeleAI-7B2CBF?style=for-the-badge&logo=github&logoColor=white"></a>
   <a href="https://huggingface.co/SEELE-AI"><img alt="Hugging Face" src="https://img.shields.io/badge/Hugging%20Face-SEELE--AI-39D353?style=for-the-badge&logo=huggingface&logoColor=black"></a>
+  <a href="https://huggingface.co/datasets/SEELE-AI/EVA01-Edit"><img alt="EVA01-Edit Dataset" src="https://img.shields.io/badge/EVA01--Edit%20Dataset-39D353?style=for-the-badge&logo=huggingface&logoColor=black"></a>
   <a href="https://www.seeles.ai/research/pages/EVA01"><img alt="Project Page" src="https://img.shields.io/badge/Project%20Page-EVA01-39D353?style=for-the-badge"></a>
   <a href="https://arxiv.org/abs/2605.16745"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2605.16745-7B2CBF?style=for-the-badge&logo=arxiv&logoColor=white"></a>
   <a href="https://x.com/SEELE_AI1125"><img alt="X" src="https://img.shields.io/badge/X-SEELE_AI1125-111111?style=for-the-badge&logo=x&logoColor=white"></a>
@@ -20,6 +21,7 @@ OpenEVA is the community release hub for SEELE-AI's EVA series: native 3D founda
 
 ## 🗞️ News
 
+- 🟢 **2026-11-05** · The [EVA01-Edit dataset](https://huggingface.co/datasets/SEELE-AI/EVA01-Edit) is now publicly released with mesh and prompt records for three-stage edit chains.
 - 🟢 **2026-10-20** · OpenEVA opens the EVA01 Unified All-Task generation runtime for text-to-3D and image-to-3D inference.
 - 🟢 **2026-06-16** · OpenEVA opens the EVA01 mesh-understanding release path with inference, evaluation, and gallery assets.
 - 🟣 **2026-05-16** · The EVA01 technical report appears on arXiv: [2605.16745](https://arxiv.org/abs/2605.16745).
@@ -44,7 +46,7 @@ The current public package contains the final **EVA01 Unified All-Task** boundar
 | EVA01 Unified All-Task LoRA | 🟢 Generation LoRA | [`SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA`](https://huggingface.co/SEELE-AI/EVA01-Unified-All-Task-Generation-LoRA) | Generation-only LoRA export with the same Unified MoT ABI. |
 | EVA01-2B-Instruct | 🟢 Mesh understanding | [`SEELE-AI/EVA01-2B-Instruct`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct) | Mesh UND checkpoint for QA and description. |
 | EVA01-2B-Instruct-LoRA | 🟢 Mesh understanding LoRA | [`SEELE-AI/EVA01-2B-Instruct-LoRA`](https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA) | PEFT adapter release for mesh understanding. |
-| EVA01 data | 🟣 Planned | TBA | Public data release is planned. |
+| EVA01-Edit dataset | 🟢 Released | [`SEELE-AI/EVA01-Edit`](https://huggingface.co/datasets/SEELE-AI/EVA01-Edit) | Public mesh and prompt records for three-stage edit chains. |
 
 ## ⚡ Quick Start
 
@@ -91,10 +93,9 @@ The EVA01 package gallery combines mesh-understanding examples with selected tex
 
 ## 🗺️ Roadmap
 
-- 🟣 **Data release**: public data packaging is planned.
+- 🟢 **EVA01-Edit dataset**: mesh and prompt records for three-stage edit chains are publicly available.
 - 🟡 **Training release**: training code and recipes are planned for a future release.
 - 🟡 **Editing**: the edit branch and edit checkpoints are planned for a future release.
-- 🧪 **Evaluation assets**: benchmark packaging and reproducibility evidence will continue to be consolidated around the public EVA01 flow.
 
 ## 📚 Citation
 
