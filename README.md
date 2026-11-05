@@ -1,7 +1,6 @@
 # OpenEVA
 
 <p align="center">
-  <a href="https://github.com/SeeleAI/OpenEVA"><img alt="Visitors" src="https://visitor-badge.laobi.icu/badge?page_id=SeeleAI.OpenEVA&left_color=7B2CBF&right_color=39D353"></a>
   <a href="https://github.com/SeeleAI"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-SeeleAI-7B2CBF?style=for-the-badge&logo=github&logoColor=white"></a>
   <a href="https://huggingface.co/SEELE-AI"><img alt="Hugging Face" src="https://img.shields.io/badge/Hugging%20Face-SEELE--AI-39D353?style=for-the-badge&logo=huggingface&logoColor=black"></a>
   <a href="https://huggingface.co/datasets/SEELE-AI/EVA01-Edit"><img alt="EVA01-Edit Dataset" src="https://img.shields.io/badge/EVA01--Edit%20Dataset-39D353?style=for-the-badge&logo=huggingface&logoColor=black"></a>
@@ -21,7 +20,7 @@ OpenEVA is the community release hub for SEELE-AI's EVA series: native 3D founda
 
 ## 🗞️ News
 
-- 🟢 **2026-11-05** · The [EVA01-Edit dataset](https://huggingface.co/datasets/SEELE-AI/EVA01-Edit) is now publicly released with mesh and prompt records for three-stage edit chains.
+- 🟢 **2026-11-02** · The [EVA01-Edit dataset](https://huggingface.co/datasets/SEELE-AI/EVA01-Edit) is now publicly released with mesh and prompt records for three-stage edit chains.
 - 🟢 **2026-10-20** · OpenEVA opens the EVA01 Unified All-Task generation runtime for text-to-3D and image-to-3D inference.
 - 🟢 **2026-06-16** · OpenEVA opens the EVA01 mesh-understanding release path with inference, evaluation, and gallery assets.
 - 🟣 **2026-05-16** · The EVA01 technical report appears on arXiv: [2605.16745](https://arxiv.org/abs/2605.16745).

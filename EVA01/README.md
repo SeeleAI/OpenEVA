@@ -1,7 +1,6 @@
 # EVA01: Unified Native 3D Understanding and Generation via Mixture-of-Transformers
 
 <p align="center">
-  <a href="https://github.com/SeeleAI/OpenEVA"><img alt="Visitors" src="https://visitor-badge.laobi.icu/badge?page_id=SeeleAI.OpenEVA.EVA01&left_color=7B2CBF&right_color=39D353"></a>
   <a href="https://github.com/SeeleAI/OpenEVA"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-OpenEVA-7B2CBF?style=for-the-badge&logo=github&logoColor=white"></a>
   <a href="https://huggingface.co/SEELE-AI/EVA01-2B-Instruct"><img alt="Hugging Face Full" src="https://img.shields.io/badge/%F0%9F%A4%97%20Full-EVA01--2B--Instruct-39D353?style=for-the-badge"></a>
   <a href="https://huggingface.co/SEELE-AI/EVA01-2B-Instruct-LoRA"><img alt="Hugging Face LoRA" src="https://img.shields.io/badge/%F0%9F%A4%97%20LoRA-EVA01--2B--Instruct--LoRA-7B2CBF?style=for-the-badge"></a>
